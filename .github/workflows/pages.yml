@@ -1,0 +1,59 @@
+# 把网站直接发布到 GitHub Pages（纯静态，不需要服务器）
+#
+# 用法：仓库 Settings → Pages → Build and deployment → Source 选 "GitHub Actions"，
+#      之后每次 push 到 main 都会自动重新发布。
+#
+# 两个前提（本站用的是 /style.css、/image/... 这种绝对路径）：
+#   1) 仓库名必须是 <你的用户名>.github.io，或者
+#   2) 在 Pages 里绑定自定义域名（比如 loongstudio.net）并放一个 CNAME 文件。
+#   如果部署在 <用户名>.github.io/仓库名/ 这种子路径下，绝对路径会 404。
+#
+# /works、/about 这些地址没有对应的真实文件，Pages 会返回 404.html，
+# 所以下面把 index.html 额外复制一份当 404.html —— 打开链接照样能进站，路由交给 app.js。
+
+name: 发布到 GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 打包站点
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 组装待发布的文件
+        run: |
+          mkdir -p dist
+          cp -r index.html style.css app.js image assets dist/
+          cp index.html dist/404.html
+          touch dist/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: 发布
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

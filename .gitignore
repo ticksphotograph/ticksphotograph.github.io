@@ -1,0 +1,12 @@
+# 这个仓库只放静态站点本身（index.html / style.css / app.js / image / assets）
+# Docker 和本机部署相关的文件只在本地用，不进仓库
+Dockerfile
+.dockerignore
+nginx.conf
+start.bat
+.github/workflows/docker-image.yml
+
+# 系统杂项
+.DS_Store
+Thumbs.db
+desktop.ini
