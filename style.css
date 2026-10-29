@@ -1,6 +1,6 @@
 /* =========================================================
    品牌官网布局模板 · 关于我们 / 作品
-   设计还原：品牌蓝 #3C8CFF · 白色圆角卡片 · 弥散光斑 · 大字号留白
+   设计还原：CRT 暗屏复古游戏机 · 霓虹绿/青/品红 · 像素描边 · 扫描线 · 硬边方块卡片 · 大字号留白
    ========================================================= */
 
 /* ---------- 字体 ---------- */
@@ -18,13 +18,6 @@
   font-family: 'Gilroy';
   src: url('assets/Gilroy-Bold.otf') format('opentype');
   font-weight: 700; font-display: swap;
-}
-/* 得意黑 Smiley Sans：开源（SIL OFL 1.1）中文标题字体，倾斜、锐利，专做大字。
-   这里用的是子集版（常用字 3872 个，1.15MB → 503KB），完整字体在 D:/appdata/fonts-src/ */
-@font-face {
-  font-family: 'Smiley Sans';
-  src: url('assets/SmileySans-Subset.woff2') format('woff2');
-  font-weight: 400; font-display: swap;
 }
 @font-face {
   font-family: 'DM Sans';
@@ -44,12 +37,25 @@
   src: url('assets/Pacifico-Subset.woff2') format('woff2');
   font-weight: 400; font-display: swap;
 }
+/* 首屏大标题：站酷快乐体（圆润萌系展示体），文件在 assets/fonts/zcool-kuaile.ttf */
+@font-face {
+  font-family: 'ZCOOL KuaiLe';
+  src: url('assets/fonts/zcool-kuaile.ttf') format('truetype');
+  font-weight: 400; font-display: swap;
+}
 
 /* ---------- 基础 ---------- */
 :root {
-  --blue: #3C8CFF;
-  --ink: #333333;
-  --ink-2: #828282;
+  --blue: #F3A6C1;            /* 主点缀：樱粉 */
+  --pink: #F3A6C1;            /* 兼容旧引用：也走樱粉 */
+  --mint: #E8CBA0;            /* 次级点缀：暖金（小标签 / 年份） */
+  --crt-bg: #0e0e12;          /* 中性近黑 */
+  --panel: #17171d;           /* 卡片 / 面板底 */
+  --ink: #eceef2;             /* 正文：近白 */
+  --ink-2: #9aa1ad;           /* 次要文字 */
+  --line: rgba(255, 255, 255, .12);   /* 细线 */
+  --font-body: 'LXGW WenKai', 'Courier New', ui-monospace, monospace;
+  --font-display: 'LXGW WenKai', 'Songti SC', 'Noto Serif SC', serif;
   --header-h: 101px;
   --gutter: clamp(24px, 6.6vw, 95px);
   --ease: cubic-bezier(.22, 1, .36, 1);
@@ -66,14 +72,35 @@ body.nav-open { overflow: hidden; }
 
 body {
   margin: 0;
-  background: #fff;
+  background: var(--crt-bg);
   color: var(--ink);
-  font-family: 'Gilroy', 'DM Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC',
-               'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+}
+/* 柔和暗角：给全站一点电影感（无扫描线、无闪烁，不拦截点击） */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 64%, rgba(0, 0, 0, .26) 100%);
+  opacity: 1;
+}
+
+/* 纯色区底：一层极淡的中性顶光，给近黑一点纵深（无扫描线、无彩色辉光） */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;                 /* 在 body 背景之上、所有内容之下 */
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% -8%, rgba(255, 255, 255, .05), transparent 55%),
+    var(--crt-bg);
 }
 
 h1, h2, h3, h4, p, ul, dl { margin: 0; padding: 0; }
@@ -122,10 +149,10 @@ img { display: block; max-width: 100%; }
 .header.is-solid::before { opacity: 0; }
 .header.is-solid {
   height: 72px;
-  background: rgba(255, 255, 255, .86);
-  backdrop-filter: saturate(180%) blur(16px);
-  -webkit-backdrop-filter: saturate(180%) blur(16px);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, .06), 0 10px 30px rgba(20, 40, 80, .07);
+  background: rgba(14, 14, 18, .85);
+  backdrop-filter: saturate(160%) blur(16px);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+  box-shadow: 0 1px 0 var(--line), 0 10px 30px rgba(0, 0, 0, .5);
 }
 
 /* 作品视图：导航和首屏一样保持透明，顶部只压一档薄暗保证白字可读 */
@@ -149,35 +176,24 @@ body.view-products .header:not(.is-solid)::before {
 
 .brand { display: flex; align-items: center; gap: 10px; }
 
-/* 品牌标：蓝底圆角方 + 小龙脑袋（两只角、两只眼、一个笑） */
-.brand-mark {
-  display: block;
-  flex: none;
-  width: 26px;
-  height: 26px;
-  transition: width .3s var(--ease), height .3s var(--ease);
-}
-.header.is-solid .brand-mark { width: 22px; height: 22px; }
-.brand-mark--lg { width: 34px; height: 34px; }
-
-/* 品牌名：手写签名体（Pacifico）。换文案不用动样式，两层品牌位共用这一套 */
+/* 品牌名：手写体（Pacifico），像签名一样，更有个性 */
 .brand-text {
   color: #fff;
-  font-family: 'Pacifico', 'Gilroy', cursive;
-  font-weight: 400;              /* Pacifico 只有 400，写 700 会被浏览器伪加粗变糊 */
-  font-size: 28px;
-  letter-spacing: 0;             /* 手写体不能加字距，否则连笔会断 */
-  line-height: 1;
-  padding: .06em 0 .14em;        /* 补 g/y 的下伸部分，视觉上垂直居中 */
-  text-shadow: 0 1px 3px rgba(0, 0, 0, .45), 0 2px 14px rgba(0, 0, 0, .32);
+  font-family: 'Pacifico', 'LXGW WenKai', cursive;
+  font-weight: 400;
+  font-size: 25px;
+  letter-spacing: 0;              /* 手写体加字距会断开连笔，置零 */
+  line-height: 1.15;
+  padding: .1em 0 .16em;          /* Pacifico 上下伸部较高，留点余量避免被裁 */
+  text-shadow: 0 1px 12px rgba(0, 0, 0, .5);
   transition: font-size .3s var(--ease), color .3s ease;
 }
 .header.is-solid .brand-text {
-  font-size: 24px;
+  font-size: 22px;
   color: var(--ink);
   text-shadow: none;
 }
-.brand-text--lg { font-size: 36px; letter-spacing: 0; padding: .04em 0 .16em; }
+.brand-text--lg { font-size: 40px; letter-spacing: 0; padding: .06em 0 .18em; }
 
 
 .nav { display: flex; align-items: center; gap: clamp(18px, 2.7vw, 42px); }
@@ -235,13 +251,28 @@ body.view-products .header:not(.is-solid)::before {
   height: 100vh;
   min-height: 560px;
   overflow: hidden;
-  background: #eef2f8;
+  background: var(--crt-bg);
 }
 @supports (height: 100svh) {
   .hero { height: 100svh; }
 }
 
+/* 首屏不再有闪烁的「开始」光标（终端元素已移除） */
+
 .hero-media { position: absolute; inset: 0; }
+
+/* 首屏图底部渐隐到背景色，和下方"关于我"纯色区自然衔接，不再有硬边 */
+.hero-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    transparent 62%,
+    rgba(14, 14, 18, .55) 86%,
+    var(--crt-bg) 100%);
+}
 
 /* 单页首屏：静态图 + 极缓推近，不再轮播
    用 transition 而不是 animation —— animation 在 display:none 切回来会从头重放，
@@ -261,43 +292,58 @@ body.view-products .header:not(.is-solid)::before {
   transform: scale(1.11) translate3d(-1%, -.6%, 0);
 }
 
-/* 白色使命卡片（左下大圆角，还原原站 135px 切角） */
+/* 开放的霓虹标题区：不再用黑框卡片，文字直接浮在 CRT 屏上，
+   背后一块模糊柔光暗角托住可读性（避免硬黑框，也不压住背景图） */
 .mission {
   position: absolute;
   top: calc(var(--header-h) + 14px);
   left: clamp(24px, 8vw, 115px);
   width: clamp(280px, 26.4vw, 380px);
-  padding: clamp(48px, 5vw, 66px) 42px clamp(52px, 5.4vw, 72px) 39px;
-  background: #fff;
-  border-radius: 0 0 clamp(70px, 9.4vw, 135px) 0;
+  padding: clamp(28px, 3vw, 44px) 0 0 0;
+  isolation: isolate;
   opacity: 0;
   transform: translateY(-18px);
   transition: opacity .9s var(--ease) .1s, transform .9s var(--ease) .1s;
 }
 .mission.is-run { opacity: 1; transform: none; }
+/* 文字后方的柔光暗角（背景框）已去掉，改由标题自身的柔和投影保证可读性 */
 
 .mission-label {
-  font-size: clamp(18px, 1.8vw, 26px);
+  font-family: var(--font-display);
   font-weight: 500;
+  font-size: clamp(12px, 1.1vw, 14px);
   line-height: 1.2;
-  color: var(--ink-2);
-  letter-spacing: .02em;
+  color: var(--mint);            /* 暖金小标签 */
+  letter-spacing: .42em;
+  text-transform: uppercase;
 }
+/* 「一言」标签前的那根横线已去掉 */
 
 .mission-title {
-  margin-top: 22px;
-  font-size: clamp(34px, 4vw, 58px);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -.01em;
-  color: var(--ink);
+  /* 手写体：优先华文行楷，其次楷体，非 Windows 回退霞鹜文楷 */
+  font-family: 'STXingkai', '华文行楷', 'Xingkai SC', 'Kaiti SC',
+               'STKaiti', 'KaiTi', '楷体', 'LXGW WenKai', cursive;
+  font-weight: 400;             /* 手写字体一般只有常规体，避免合成加粗失真 */
+  margin-top: 20px;
+  font-size: clamp(30px, 3.6vw, 48px);   /* 固定字号，句子长了自然换行，不再缩放 */
+  line-height: 1.4;
+  letter-spacing: .01em;
+  color: #fff;
+  /* 只留一层柔和暗影，压在大图上也能读清；不再做像素描边 */
+  text-shadow: 0 2px 30px rgba(0, 0, 0, .55), 0 1px 3px rgba(0, 0, 0, .4);
 }
-.mission-title em {
-  display: block;
-  font-style: normal;
-  font-weight: 700;
-  color: #adadad;
+/* 出处：单独一行小字，白字（原来用樱粉）；没有出处时不占位 */
+.mission-from {
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-size: clamp(13px, 1.1vw, 16px);
+  letter-spacing: .04em;
+  color: #fff;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, .55), 0 1px 3px rgba(0, 0, 0, .4);
 }
+.mission-from:empty { display: none; }
+
+/* 标题改为自然的淡入上浮（由 .mission 的过渡负责），不再逐字打印 / 闪烁光标 */
 
 /* ---------- 关于我们（一屏 · 一图） ---------- */
 .about {
@@ -309,30 +355,20 @@ body.view-products .header:not(.is-solid)::before {
   height: 100svh;
   padding: clamp(104px, 13vh, 150px) 0 clamp(56px, 8vh, 96px);
   overflow: hidden;
+  /* 近黑底 + 贴在插画后方的极淡樱粉 / 暖金环境光：
+     高光放在中下部，顶边保持近黑，和首屏图底部渐隐同色、衔接无缝 */
+  background:
+    radial-gradient(85% 70% at 80% 78%, rgba(243, 166, 193, .09), transparent 62%),
+    radial-gradient(70% 60% at 8% 96%, rgba(232, 203, 160, .05), transparent 60%),
+    var(--crt-bg);
   /* 不加 scroll-margin：点「关于我们」正好停在这一屏的顶边，
      顶部 117px 是留白，固定导航压在上面也不会盖到字 */
   scroll-margin-top: 0;
 }
 
-/* 弥散光斑 */
-.blobs { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
-/* 光斑只用一支蓝色：原来的暖黄和品牌蓝互相打架，整块画面偏脏 */
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(70px);
-  opacity: .55;
-}
-.blob-a {
-  width: 780px; height: 780px;
-  top: -280px; right: -240px;
-  background: radial-gradient(circle at 40% 40%, #cfe1ff, rgba(207, 225, 255, 0) 68%);
-}
-.blob-b {
-  width: 820px; height: 820px;
-  bottom: -340px; left: -380px;
-  background: radial-gradient(circle at 50% 50%, #e6efff, rgba(230, 239, 255, 0) 70%);
-}
+/* 关于我背后的彩色大光晕已移除：色块在纯色区会显成"怪"的色块。
+   改由全局中性冷光（body::before）+ 扫描线 + 暗角统一营造 CRT 质感，
+   霓虹色只用在文字 / 描边 / 边框上，不再做背景填充。 */
 
 .about-inner {
   position: relative;
@@ -345,31 +381,34 @@ body.view-products .header:not(.is-solid)::before {
 }
 
 .eyebrow {
-  font-size: 15px;
-  letter-spacing: .12em;
-  color: var(--blue);
-  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .38em;
+  font-weight: 500;
   margin-bottom: 22px;
+  font-family: 'DM Sans', var(--font-display);
+  text-transform: uppercase;
+  color: var(--mint);            /* 暖金 */
 }
 
 .sec-title {
+  font-family: var(--font-display);
+  font-weight: 400;
   font-size: clamp(30px, 3.6vw, 52px);
-  font-weight: 700;
-  line-height: 1.28;
-  letter-spacing: -.015em;
+  line-height: 1.3;
+  letter-spacing: .01em;
   color: var(--ink);
 }
 .sec-title .muted {
   display: block;
-  color: #bdbdbd;
+  color: var(--ink-2);
 }
 
 .about-lead {
   margin-top: 28px;
   max-width: 470px;
   font-size: 16.5px;
-  line-height: 1.95;
-  color: #5a5a5a;
+  line-height: 2;
+  color: var(--ink-2);
 }
 
 /* 小注脚：一眼看出是几个人的作坊，不是大公司 */
@@ -379,7 +418,7 @@ body.view-products .header:not(.is-solid)::before {
   align-items: baseline;
   margin-top: 24px;
   font-size: 14px;
-  color: #6f7887;
+  color: var(--ink-2);
 }
 .about-meta li { display: inline-flex; align-items: baseline; }
 .about-meta li + li {
@@ -396,14 +435,14 @@ body.view-products .header:not(.is-solid)::before {
   height: 3px;
   margin-top: -2px;
   border-radius: 50%;
-  background: #c9cfd8;
+  background: #3a4254;
 }
 .about-meta b {
-  font-family: 'DM Sans', 'Gilroy', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
   margin-right: 5px;
-  color: var(--blue);
+  color: var(--blue);            /* 樱粉数字 */
 }
 
 .about-link {
@@ -421,10 +460,11 @@ body.view-products .header:not(.is-solid)::before {
   margin: 0;
   aspect-ratio: 4 / 3;
   max-height: 54vh;
-  border-radius: clamp(18px, 1.6vw, 24px);
+  border-radius: 10px;
   overflow: hidden;
-  background: #eef2f8;
-  box-shadow: 0 24px 60px rgba(20, 40, 80, .12);
+  background: var(--panel);
+  border: 1px solid rgba(243, 166, 193, .22);       /* 柔和樱粉描边，呼应主题 */
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .45), 0 0 90px rgba(243, 166, 193, .06);
 }
 .about-media img {
   width: 100%;
@@ -436,59 +476,9 @@ body.view-products .header:not(.is-solid)::before {
 }
 .about-media:hover img { transform: scale(1.03); }
 
-/* ---------- 行为准则 ---------- */
+/* ---------- 区块标题 ---------- */
 .sec-head { margin-bottom: clamp(30px, 3.2vw, 52px); }
 .sec-head .eyebrow { margin-bottom: 18px; }
-
-.code {
-  position: relative;
-  padding: clamp(72px, 6.6vw, 110px) 0 clamp(64px, 6vw, 96px);
-  scroll-margin-top: 72px;
-  background: #f7f9fd;
-}
-
-.code-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(14px, 1.4vw, 22px);
-}
-
-.code-grid li {
-  position: relative;
-  padding: clamp(24px, 2.2vw, 34px) clamp(22px, 2vw, 30px) clamp(24px, 2.2vw, 32px);
-  background: #fff;
-  border: 1px solid rgba(20, 40, 80, .07);
-  border-radius: clamp(14px, 1.3vw, 20px);
-  transition: transform .5s var(--ease), box-shadow .5s var(--ease),
-              border-color .5s var(--ease);
-}
-.code-grid li:hover {
-  transform: translateY(-4px);
-  border-color: rgba(60, 140, 255, .28);
-  box-shadow: 0 20px 44px rgba(20, 40, 80, .09);
-}
-
-.code-num {
-  display: block;
-  font-family: 'Gilroy', 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .14em;
-  color: var(--blue);
-  opacity: .8;
-}
-.code-grid h3 {
-  margin-top: 14px;
-  font-size: clamp(18px, 1.5vw, 21px);
-  font-weight: 700;
-  letter-spacing: -.01em;
-}
-.code-grid p {
-  margin-top: 10px;
-  font-size: 14.5px;
-  line-height: 1.85;
-  color: #6d6d6d;
-}
 
 /* ---------- 大事记：横向时间轴 ---------- */
 /* 仿原站：一条横线串起年份节点，当前节点放大填充，上方一张卡片跟着节点横向滑动 */
@@ -510,10 +500,10 @@ body.view-products .header:not(.is-solid)::before {
   align-self: flex-start;
   width: min(400px, 100%);
   padding: clamp(22px, 2vw, 28px) clamp(22px, 2vw, 30px) clamp(24px, 2vw, 30px);
-  background: #fff;
-  border: 1px solid rgba(20, 40, 80, .07);
-  border-radius: 18px;
-  box-shadow: 0 22px 48px rgba(20, 40, 80, .09), 0 2px 6px rgba(20, 40, 80, .04);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .45);
   transform: translateX(var(--x, 0px));
   transition: transform .72s var(--ease);
   /* 内容垂直居中：空年份的卡片不会一大片留白全堆在下面 */
@@ -524,33 +514,34 @@ body.view-products .header:not(.is-solid)::before {
 .tl-card.is-swapping .tl-card-inner { opacity: 0; }
 
 .tl-date {
-  font-family: 'DM Sans', 'Gilroy', sans-serif;
+  font-family: var(--font-display);
   font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .18em;
-  color: var(--blue);
+  font-weight: 500;
+  letter-spacing: .22em;
+  color: var(--mint);            /* 暖金年份 */
 }
 .tl-card h3 {
   margin-top: 10px;
+  font-family: var(--font-display);
+  font-weight: 400;
   font-size: clamp(19px, 1.7vw, 24px);
-  font-weight: 700;
-  letter-spacing: -.01em;
-  line-height: 1.35;
+  letter-spacing: .01em;
+  line-height: 1.4;
   color: var(--ink);
 }
 .tl-desc {
   margin-top: 10px;
   font-size: 14.5px;
   line-height: 1.85;
-  color: #6d6d6d;
+  color: var(--ink-2);
 }
 
 /* 空年份的卡片：字淡下去，像笔记本里还没填的格子 */
 .tl-card.is-empty h3 {
-  color: #c6ccd7;
+  color: var(--ink-2);
   letter-spacing: .22em;
 }
-.tl-card.is-empty .tl-desc { color: #a9b1bd; }
+.tl-card.is-empty .tl-desc { color: var(--ink-2); }
 
 .tl-rail {
   position: relative;
@@ -570,10 +561,10 @@ body.view-products .header:not(.is-solid)::before {
   top: 7px;
   height: 1px;
   background: linear-gradient(90deg,
-    rgba(20, 40, 80, .04),
-    rgba(20, 40, 80, .16) 10%,
-    rgba(20, 40, 80, .16) 90%,
-    rgba(20, 40, 80, .04));
+    rgba(255, 255, 255, .03),
+    rgba(255, 255, 255, .22) 10%,
+    rgba(255, 255, 255, .22) 90%,
+    rgba(255, 255, 255, .03));
 }
 
 .tl-node {
@@ -594,10 +585,10 @@ body.view-products .header:not(.is-solid)::before {
 .tl-dot {
   width: 14px; height: 14px;
   border-radius: 50%;
-  background: #fff;
-  border: 1.5px solid rgba(20, 40, 80, .22);
-  /* 用一圈白把横线在圆点处断开 */
-  box-shadow: 0 0 0 7px #fff;
+  background: var(--crt-bg);
+  border: 1.5px solid rgba(255, 255, 255, .28);
+  /* 用一圈暗把横线在圆点处断开 */
+  box-shadow: 0 0 0 7px var(--crt-bg);
   transition: transform .55s var(--ease), background .45s ease,
               border-color .45s ease, box-shadow .45s ease;
 }
@@ -606,24 +597,23 @@ body.view-products .header:not(.is-solid)::before {
   background: var(--blue);
   border-color: var(--blue);
   transform: scale(1.5);
-  box-shadow: 0 0 0 7px #fff, 0 0 0 12px rgba(60, 140, 255, .12);
+  box-shadow: 0 0 0 7px var(--crt-bg), 0 0 0 12px rgba(243, 166, 193, .22);
 }
 
 .tl-year {
-  font-family: 'DM Sans', 'Gilroy', sans-serif;
+  font-family: var(--font-display);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: .05em;
-  color: #a7b0bd;
+  color: var(--ink-2);
   transition: color .4s ease;
 }
-.tl-node:hover .tl-year { color: #6d7684; }
-.tl-node.is-active .tl-year { color: var(--ink); }
+.tl-node:hover .tl-year { color: var(--ink); }
+.tl-node.is-active .tl-year { color: var(--blue); }
 
-/* ---------- 视图切换：主页（首屏 / 关于我们 / 行为准则 / 大事记）与作品页互斥 ---------- */
+/* ---------- 视图切换：主页（首屏 / 关于我们 / 大事记）与作品页互斥 ---------- */
 body:not(.view-home) .hero,
 body:not(.view-home) .about,
-body:not(.view-home) .code,
 body:not(.view-home) .history { display: none; }
 body:not(.view-products) .products { display: none; }
 
@@ -634,7 +624,7 @@ body.view-products .footer { display: none; }
 /* ---------- 作品 ---------- */
 .products {
   position: relative;
-  background: #fff;
+  background: var(--crt-bg);
 }
 
 .product-list { position: relative; }
@@ -749,13 +739,13 @@ body.view-products .footer { display: none; }
   display: block;
   width: clamp(24px, 2.4vw, 34px);
   height: 1px;
-  background: var(--accent-light, #3C8CFF);
+  background: var(--accent-light, #F3A6C1);
 }
 
 /* 中文名：超大号得意黑，白色里扫过一道产品主色 */
 .product-name-cn {
   display: inline-block;         /* 收成文字宽度，渐变和高亮条才贴合字身 */
-  font-family: 'Smiley Sans', 'Gilroy', 'DM Sans', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(58px, 7.2vw, 104px);
   font-weight: 400;              /* 得意黑只有一个字重，别让浏览器合成加粗 */
   line-height: 1.04;
@@ -785,10 +775,10 @@ body.view-products .footer { display: none; }
     background-image: linear-gradient(100deg,
       #ffffff 0%,
       #ffffff 16%,
-      var(--accent-light, var(--accent, #3C8CFF)) 30%,
+      var(--accent-light, var(--accent, #F3A6C1)) 30%,
       #ffffff 44%,
       #ffffff 58%,
-      var(--accent-light, var(--accent, #3C8CFF)) 72%,
+      var(--accent-light, var(--accent, #F3A6C1)) 72%,
       #ffffff 86%,
       #ffffff 100%);
     -webkit-background-clip: text;
@@ -816,7 +806,7 @@ body.view-products .footer { display: none; }
   display: block;
   width: clamp(20px, 2vw, 30px);
   height: 1px;
-  background: var(--accent-light, #3C8CFF);
+  background: var(--accent-light, #F3A6C1);
   opacity: .8;
 }
 
@@ -851,7 +841,7 @@ body.view-products .footer { display: none; }
   gap: 8px;
   margin-top: 26px;
   font-size: 15.5px;
-  color: #CFE1FF;
+  color: var(--pink);
   opacity: 0;
   transform: translateY(24px);
   transition: opacity .45s var(--ease) .12s, transform .45s var(--ease) .12s,
@@ -867,6 +857,43 @@ body.view-products .footer { display: none; }
 .product.is-in .product-link {
   opacity: 1;
   transform: none;
+}
+
+/* 切到下一个作品时的「开机」过场：内容模糊上浮归位，每次成为当前屏都会重放 */
+.product.is-current .product-inner {
+  animation: workBoot .55s var(--ease) both;
+}
+@keyframes workBoot {
+  0%   { opacity: 0; transform: translateY(26px) scale(.985); filter: blur(5px); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+
+/* CRT 刷新感：一道青色扫描线横扫过屏，落到新作品时触发一次 */
+.product::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 38%;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(255, 255, 255, .10) 78%,
+    rgba(255, 255, 255, .38) 100%);
+  opacity: 0;
+}
+.product.is-current::before {
+  animation: scanSweep .8s ease-out 1;
+}
+@keyframes scanSweep {
+  0%   { transform: translateY(-110%); opacity: 0; }
+  15%  { opacity: 1; }
+  100% { transform: translateY(265%); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .product.is-current .product-inner { animation: none; }
+  .product.is-current::before { animation: none; }
 }
 
 /* 右侧竖向快速导航 */
@@ -911,7 +938,7 @@ body.view-products .footer { display: none; }
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--accent, #3C8CFF);
+  background: var(--accent, #F3A6C1);
   color: #fff;
   font-family: 'Gilroy', 'DM Sans', sans-serif;
   font-size: 13px;
@@ -948,14 +975,22 @@ body.view-products .footer { display: none; }
 .rail-item:hover::after { opacity: 1; transform: translateY(-50%) translateX(0); }
 
 /* ---------- 页脚 ---------- */
-/* 浅底 + 一根细分割线：整块蓝太抢眼，蓝色只留给 hover 和品牌位 */
+/* 暗底 + 一根霓虹分割线：整块 CRT 暗屏，霓虹只留给 hover 和品牌位 */
 .footer {
-  background: #f4f7fc;
+  background: transparent;      /* 透出 body::before 的 CRT 屏幕质感（角落辉光 + 点阵） */
   color: var(--ink);
-  border-top: 1px solid rgba(20, 40, 80, .07);
+  border-top: 1px solid var(--line);
   padding: clamp(56px, 6.6vw, 84px) 0 26px;
 }
 .footer .brand-text { color: var(--ink); text-shadow: none; }
+/* 页脚版权里的品牌名也用手写体 */
+.brand-script {
+  font-family: 'Pacifico', 'LXGW WenKai', cursive;
+  font-weight: 400;
+  font-size: 1.3em;
+  letter-spacing: 0;
+  color: var(--ink);
+}
 
 .footer-main {
   display: grid;
@@ -969,7 +1004,7 @@ body.view-products .footer { display: none; }
 .footer-brand p {
   margin-top: 20px;
   font-size: 15px;
-  color: #7b8493;
+  color: var(--ink-2);
   letter-spacing: .06em;
 }
 
@@ -980,10 +1015,12 @@ body.view-products .footer { display: none; }
   justify-content: end;
 }
 .footer-col h4 {
-  font-size: 14px;
+  font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: .06em;
-  opacity: .62;
+  font-size: 15px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--mint);
   margin-bottom: 18px;
 }
 .footer-col a {
@@ -991,7 +1028,7 @@ body.view-products .footer { display: none; }
   font-size: 14.5px;
   line-height: 2.15;
   white-space: nowrap;
-  color: #606a79;
+  color: var(--ink-2);
   width: fit-content;
   transition: color .3s ease, transform .3s var(--ease);
 }
@@ -1000,7 +1037,7 @@ body.view-products .footer { display: none; }
   margin-top: 14px;
   font-size: 13.5px;
   line-height: 1.8;
-  color: #98a1ae;
+  color: var(--ink-2);
 }
 
 .footer-bottom {
@@ -1009,9 +1046,9 @@ body.view-products .footer { display: none; }
   gap: 16px;
   flex-wrap: wrap;
   padding-top: 24px;
-  border-top: 1px solid rgba(20, 40, 80, .08);
+  border-top: 1px solid var(--line);
   font-size: 13px;
-  color: #98a1ae;
+  color: var(--ink-2);
 }
 
 /* ---------- 响应式 ---------- */
@@ -1038,9 +1075,9 @@ body.view-products .footer { display: none; }
     flex-direction: column;
     align-items: flex-start;
     gap: 0;
-    background: #fff;
+    background: var(--panel);
     padding: 8px 0 16px;
-    box-shadow: 0 18px 40px rgba(20, 40, 80, .14);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .5);
     transform: translateY(-12px);
     opacity: 0;
     visibility: hidden;
@@ -1092,9 +1129,9 @@ body.view-products .footer { display: none; }
     height: auto;
     display: block;
     padding-bottom: 40px;
-    background: #fff;
+    background: var(--crt-bg);
   }
-  .product + .product { border-top: 1px solid rgba(0, 0, 0, .06); }
+  .product + .product { border-top: 1px solid var(--line); }
 
   /* 竖屏改成图在上、字在下，深色遮罩会盖住文字区，这里关掉 */
   .product::after { display: none; }
@@ -1130,22 +1167,20 @@ body.view-products .footer { display: none; }
   @supports ((-webkit-background-clip: text) or (background-clip: text)) {
     .product-name-cn {
       background-image: linear-gradient(104deg,
-        var(--ink) 6%,
-        var(--accent, #3C8CFF) 56%,
-        var(--ink) 96%);
+        #ffffff 6%,
+        var(--accent, #F3A6C1) 56%,
+        #ffffff 96%);
       filter: none;
     }
   }
   .product-name { color: var(--ink); }
-  .product-name em { color: #a4adbb; }
-  .product-desc { max-width: 100%; color: #3f4652; }
+  .product-name em { color: var(--ink-2); }
+  .product-desc { max-width: 100%; color: var(--ink-2); }
   .product-link { color: var(--blue); }
   .product-rail { display: none; }
 
   body.view-products .products { padding-top: 60px; }
 
-  .code { padding: 72px 0 64px; }
-  .code-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .history { padding: 64px 0 72px; }
 }
 
@@ -1168,11 +1203,8 @@ body.view-products .footer { display: none; }
     border-radius: 0 0 58px 0;
   }
   .mission-title { margin-top: 14px; }
-  .blob { filter: blur(50px); }
   .sec-title { font-size: 26px; }
   .product-bg { height: 66vw; }
-  .code { padding: 56px 0 48px; }
-  .code-grid { grid-template-columns: 1fr; }
   .history { padding: 48px 0 56px; }
   .footer-col a { font-size: 14px; }
   .footer-bottom { font-size: 12px; }
@@ -1184,4 +1216,91 @@ body.view-products .footer { display: none; }
     transition-duration: .001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* =========================================================
+   黑白电视模式（可回退 · 整段删掉即回到纯彩色 CRT）
+   - 默认关闭；由 <html class="theme-bw"> 开启
+   - 用一层 fixed 去色叠层（backdrop-filter）把整屏画面变成黑白，
+     同时叠加老电视暗角 + 缓慢下滑的同步亮带
+   - 切换按钮 #bwToggle 在 index.html 末尾，逻辑在 app.js 的 initBwToggle
+   ========================================================= */
+.bw-toggle {
+  position: fixed;
+  left: 16px; bottom: 16px;
+  z-index: 300;                 /* 在去色叠层(205)之上，按钮本身保持可点可读 */
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--ink-2);          /* 默认低调，不抢画面 */
+  background: rgba(10, 12, 18, .72);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .4);
+  transition: color .3s ease, border-color .3s ease, background .3s ease, transform .2s var(--ease);
+}
+.bw-toggle:hover { transform: translateY(-1px); color: var(--ink); border-color: rgba(255, 255, 255, .3); }
+.bw-toggle__dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--blue);      /* 彩色模式下是霓虹绿，切到黑白变白 */
+  box-shadow: 0 0 7px var(--blue);
+  transition: background .3s ease, box-shadow .3s ease;
+}
+.bw-toggle__text { white-space: nowrap; }
+
+/* 去色叠层：默认透明且无 filter（彩色模式完全不受影响） */
+.bw-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 205;                 /* 在扫描线(200)之上，整屏画面都在它底下被去色 */
+  pointer-events: none;         /* 不拦截点击，底下内容照常可点 */
+  /* 老电视观感：中心一抹冷白辉光（点亮的显像管）+ 四周轻暗角，避免"死灰" */
+  background:
+    radial-gradient(ellipse at center, rgba(190, 210, 255, .07) 0%, rgba(190, 210, 255, 0) 55%),
+    radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, .30) 100%);
+  opacity: 0;
+  transition: opacity .45s ease;
+}
+/* 缓慢下滑的同步亮带，老电视特有的垂直滚动感 */
+.bw-overlay::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  top: -30%;
+  height: 26%;
+  background: linear-gradient(180deg,
+    transparent 0%, rgba(255, 255, 255, .05) 50%, transparent 100%);
+  animation: tvRoll 7s linear infinite;
+}
+@keyframes tvRoll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(460%); }
+}
+
+/* 开启黑白模式：整屏去色 + 高对比（找回"电视信号"的劲），中心辉光 + 轻暗角由 background 给 */
+html.theme-bw .bw-overlay {
+  opacity: 1;
+  backdrop-filter: grayscale(1) contrast(1.22) brightness(1.06);
+  -webkit-backdrop-filter: grayscale(1) contrast(1.22) brightness(1.06);
+}
+/* 兜底：万一浏览器不支持 backdrop-filter，至少把照片去色（与全局叠层叠加也无害） */
+html.theme-bw .hero-slide,
+html.theme-bw .product-bg-img,
+html.theme-bw .about-media img { filter: grayscale(1) contrast(1.12); }
+html.theme-bw .bw-toggle { color: #fff; border-color: rgba(255, 255, 255, .45); }
+html.theme-bw .bw-toggle__dot { background: #fff; box-shadow: 0 0 8px rgba(255, 255, 255, .7); }
+
+/* 窄屏把开关挪到右下，避开页脚文字 */
+@media (max-width: 620px) {
+  .bw-toggle { left: auto; right: 14px; bottom: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bw-overlay::before { animation: none; display: none; }
 }

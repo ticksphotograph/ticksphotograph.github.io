@@ -3,33 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>LOONG STUDIO · 做小工具的工作室</title>
-<meta name="description" content="龙工作室 Loong Studio，一个做小工具的工作室。博客、网盘、NAS、图床、影音、工具，六个站点都在 loongstudio.net 上。">
-<meta name="theme-color" content="#f4f7fc">
+<title>LOONG STUDIO · 萌新的小工具窝</title>
+<meta name="description" content="龙工作室 Loong Studio，主理人是个刚入坑的萌新，平时爱折腾小工具、写写笔记、追追番。博客、网盘、NAS、图床、影音、工具，六个小站都挂在 loongstudio.net 下。">
+<meta name="theme-color" content="#0e0e12">
 <link rel="icon" href="/image/favicon.svg" type="image/svg+xml">
 <!-- 品牌名用手写体，每页首屏都要用，提前拉 -->
 <link rel="preload" href="/assets/Pacifico-Subset.woff2" as="font" type="font/woff2" crossorigin>
 
+<!-- 二次元皮肤字体：标题用站酷快乐体（圆润萌系），正文用霞鹜文楷（柔和轻小说感）；均带系统兜底 -->
+<link rel="stylesheet" href="/assets/fonts/lxgwwenkai-regular.css">
+
 <script>
-/* 首帧就把视图和标题定下来：直接打开 /works 时不会先闪一下首页，
-   同时只在作品页预热得意黑，首页不为它花流量 */
+/* 关掉浏览器默认的「刷新复原滚动位置」：否则在关于我刷新时，浏览器会把滚动位置拉回原处，
+   盖过我们的「回到顶部」，导致刷新后还停在关于我那一段 */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+/* 首帧就把视图和标题定下来：直接打开 /works 时不会先闪一下首页 */
 (function () {
   var path = (location.pathname.replace(/\/+$/, '') || '/');
   var isWorks = path === '/works' || path === '/products';
   var isAbout = path === '/about';
   document.documentElement.dataset.view = isWorks ? 'products' : 'home';
-  document.title = isWorks ? '作品 · LOONG STUDIO'
-                 : (isAbout ? '关于我们 · LOONG STUDIO'
-                            : 'LOONG STUDIO · 做小工具的工作室');
-  if (isWorks) {
-    var l = document.createElement('link');
-    l.rel = 'preload';
-    l.as = 'font';
-    l.type = 'font/woff2';
-    l.crossOrigin = 'anonymous';
-    l.href = '/assets/SmileySans-Subset.woff2';
-    document.head.appendChild(l);
-  }
+  document.title = isWorks ? '作品集 · LOONG STUDIO'
+                 : (isAbout ? '关于我 · LOONG STUDIO'
+                            : 'LOONG STUDIO · 萌新的小工具窝');
 })();
 </script>
 
@@ -84,20 +81,11 @@ document.body.className = 'view-' + (document.documentElement.dataset.view || 'h
 <header class="header" id="header">
   <div class="header-inner">
     <a class="brand" href="/" aria-label="返回首页">
-      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-        <rect width="32" height="32" rx="9.5" fill="#2A6BD8"/>
-        <path d="M10.2 13.8 7.6 6.4l5.9 3.6z" fill="#fff"/>
-        <path d="M21.8 13.8 24.4 6.4l-5.9 3.6z" fill="#fff"/>
-        <circle cx="16" cy="19.7" r="6.9" fill="#fff"/>
-        <circle cx="13.5" cy="18.9" r="1.3" fill="#2A6BD8"/>
-        <circle cx="18.5" cy="18.9" r="1.3" fill="#2A6BD8"/>
-        <path d="M14.6 22.4a1.9 1.9 0 0 0 2.8 0" fill="none" stroke="#2A6BD8" stroke-width="1.15" stroke-linecap="round"/>
-      </svg>
-      <span class="brand-text">Loong Studio</span>
+      <span class="brand-text">LoongStudio</span>
     </a>
 
     <nav class="nav" id="nav">
-      <a class="nav-item" href="/about">关于我们</a>
+      <a class="nav-item" href="#about">关于我</a>
       <a class="nav-item" href="/works">作品</a>
       <a class="nav-item" href="https://blog.loongstudio.net" target="_blank" rel="noopener">博客</a>
     </nav>
@@ -111,74 +99,47 @@ document.body.className = 'view-' + (document.documentElement.dataset.view || 'h
 <!-- ================= 首屏 · 使命 ================= -->
 <section class="hero" id="top">
   <div class="hero-media">
-    <div class="hero-slide" style="background-image:url('/image/hero.webp')"></div>
+    <!-- 首屏背景图
+         · 默认：外部随机图 API（每次刷新换一张）
+         · 只用本地图：把下面 data-api-bg="..." 这一整段删掉即可，自动改走本地图池
+         · 本地多图：data-local-bgs 里用英文逗号分隔，刷新随机取一张
+                    （某张图不存在会自动跳过换下一张，不会白屏）
+         · 图片放 html/image/ 目录，建议命名 hero.webp / hero2.webp / hero3.webp ... -->
+    <div class="hero-slide"
+         data-api-bg="https://api.boxmoe.com/random.php"
+         data-local-bgs="/image/hero.webp,/image/hero2.webp,/image/hero3.webp,/image/hero4.webp,/image/hero5.webp"></div>
   </div>
 
   <div class="mission">
-    <p class="mission-label">使命</p>
-    <h1 class="mission-title">做好工具<em>也过好日子</em></h1>
+    <p class="mission-label">一言</p>
+    <h1 class="mission-title"><span id="missionQuote">探索代码的无限可能</span></h1>
+    <p class="mission-from" id="missionFrom"></p>
   </div>
 </section>
 
 <!-- ================= 关于我们（一屏 · 一图） ================= -->
 <section class="about" id="about">
-  <div class="blobs" aria-hidden="true">
-    <span class="blob blob-a"></span>
-    <span class="blob blob-b"></span>
-  </div>
-
   <div class="container about-inner">
     <div class="about-text">
-      <p class="eyebrow reveal">关于我们</p>
+      <p class="eyebrow reveal">关于我</p>
       <h2 class="sec-title reveal">
-        一间工作室
-        <span class="muted">做着六件作品</span>
+        一个萌新
+        <span class="muted">捣鼓着几个小玩意</span>
       </h2>
       <p class="about-lead reveal">
-        Loong Studio 是一个做小工具的工作室。习惯先给自己做东西，用顺了再开放给别人，所以更新不快，但每一项都在长期维护。目前六个站点都跑在 loongstudio.net 上。
+        Loong Studio 其实就我一个人，一个刚入坑的萌新。平时喜欢自己写点小工具、折腾设备、追追番，用顺手了就摊出来给大家白嫖。更新随缘，但每一个都会长期维护。目前六个小站都挂在 loongstudio.net 下。
       </p>
       <ul class="about-meta reveal">
-        <li><b>6</b> 件作品</li>
+        <li><b>6</b> 个小站</li>
         <li><b>1</b> 台 NAS</li>
         <li><b>0</b> 个广告</li>
       </ul>
-      <a class="about-link reveal" href="/works">浏览作品 <span aria-hidden="true">→</span></a>
+      <a class="about-link reveal" href="/works">去看看 <span aria-hidden="true">→</span></a>
     </div>
 
     <figure class="about-media reveal">
       <img src="/image/about.webp" alt="工作室的插画" loading="lazy">
     </figure>
-  </div>
-</section>
-
-<!-- ================= 行为准则 ================= -->
-<section class="code" id="code">
-  <div class="container">
-    <header class="sec-head">
-      <p class="eyebrow reveal">行为准则</p>
-      <h2 class="sec-title reveal">
-        三条做事的规矩
-        <span class="muted">一直在执行</span>
-      </h2>
-    </header>
-
-    <ul class="code-grid">
-      <li class="reveal">
-        <span class="code-num">01</span>
-        <h3>先自己用</h3>
-        <p>每个功能先在自己的账号里跑一段时间，不顺手就改。没人会用的功能，不做。</p>
-      </li>
-      <li class="reveal">
-        <span class="code-num">02</span>
-        <h3>说清楚再动手</h3>
-        <p>写不清需求，通常是还没想明白。文档写给下一个人看，也写给三个月后的自己看。</p>
-      </li>
-      <li class="reveal">
-        <span class="code-num">03</span>
-        <h3>不留烂摊子</h3>
-        <p>能当场修的就当场修，不为了赶进度把问题推到下一个版本。</p>
-      </li>
-    </ul>
   </div>
 </section>
 
@@ -188,8 +149,8 @@ document.body.className = 'view-' + (document.documentElement.dataset.view || 'h
     <header class="sec-head">
       <p class="eyebrow reveal">大事记</p>
       <h2 class="sec-title reveal">
-        2026 年，站开了
-        <span class="muted">后面慢慢写</span>
+        2026 年，萌新开坑
+        <span class="muted">后面慢慢填</span>
       </h2>
     </header>
 
@@ -198,26 +159,26 @@ document.body.className = 'view-' + (document.documentElement.dataset.view || 'h
       <article class="tl-card" id="tlCard" aria-live="polite">
         <div class="tl-card-inner">
           <p class="tl-date" id="tlDate">2026</p>
-          <h3 id="tlTitle">六个站点，终于有了门牌</h3>
-          <p class="tl-desc" id="tlDesc">博客、网盘、NAS、图床、影音、工具，本来自己一直在用。今年把它们放到同一个域名下面。</p>
+          <h3 id="tlTitle">六个小站，终于有了门牌</h3>
+          <p class="tl-desc" id="tlDesc">博客、网盘、NAS、图床、影音、工具，本来自己一直在用。今年把它们放到同一个域名下面，第一次有了像样的门面。</p>
         </div>
       </article>
 
       <!-- 时间轴节点：文字写在这里，JS 只负责切换与自动播放 -->
       <div class="tl-rail" id="tlRail" role="tablist" aria-label="大事记时间轴">
-        <button class="tl-node is-active" data-index="0" data-year="2026" data-title="六个站点，终于有了门牌" data-desc="博客、网盘、NAS、图床、影音、工具，本来自己一直在用。今年把它们放到同一个域名下面，第一次有了正经的门面。" role="tab" aria-selected="true" aria-label="2026 六个站点，终于有了门牌">
+        <button class="tl-node is-active" data-index="0" data-year="2026" data-title="六个站点，终于有了门牌" data-desc="博客、网盘、NAS、图床、影音、工具，本来自己一直在用。今年把它们放到同一个域名下面，第一次有了像样的门面。" role="tab" aria-selected="true" aria-label="2026 六个站点，终于有了门牌">
           <span class="tl-dot" aria-hidden="true"></span>
           <span class="tl-year">2026</span>
         </button>
-        <button class="tl-node" data-index="1" data-year="2027" data-title="待续" data-desc="还没到。" data-placeholder="1" role="tab" aria-selected="false" aria-label="2027 待续">
+        <button class="tl-node" data-index="1" data-year="2027" data-title="待补" data-desc="还没写到～" data-placeholder="1" role="tab" aria-selected="false" aria-label="2027 待续">
           <span class="tl-dot" aria-hidden="true"></span>
           <span class="tl-year">2027</span>
         </button>
-        <button class="tl-node" data-index="2" data-year="2028" data-title="待续" data-desc="还没到。" data-placeholder="1" role="tab" aria-selected="false" aria-label="2028 待续">
+        <button class="tl-node" data-index="2" data-year="2028" data-title="待补" data-desc="还没写到～" data-placeholder="1" role="tab" aria-selected="false" aria-label="2028 待续">
           <span class="tl-dot" aria-hidden="true"></span>
           <span class="tl-year">2028</span>
         </button>
-        <button class="tl-node" data-index="3" data-year="2029" data-title="待续" data-desc="还没到。" data-placeholder="1" role="tab" aria-selected="false" aria-label="2029 待续">
+        <button class="tl-node" data-index="3" data-year="2029" data-title="待补" data-desc="还没写到～" data-placeholder="1" role="tab" aria-selected="false" aria-label="2029 待续">
           <span class="tl-dot" aria-hidden="true"></span>
           <span class="tl-year">2029</span>
         </button>
@@ -239,7 +200,7 @@ document.body.className = 'view-' + (document.documentElement.dataset.view || 'h
           <span class="product-name-cn" data-text="博客">博客</span>
           <em>Blog</em>
         </h3>
-        <p class="product-desc">写代码、折腾设备、看番的笔记都在这，偶尔也发点生活。更新不快，但都是真事。</p>
+        <p class="product-desc">码代码、折腾设备、追番的流水账都丢这儿了，偶尔碎碎念。更新随缘，但都是真事儿。</p>
         <a class="product-link" href="https://blog.loongstudio.net" target="_blank" rel="noopener">https://blog.loongstudio.net <span aria-hidden="true">↗</span></a>
       </div>
     </article>
@@ -253,7 +214,7 @@ document.body.className = 'view-' + (document.documentElement.dataset.view || 'h
           <span class="product-name-cn" data-text="网盘">网盘</span>
           <em>Drive</em>
         </h3>
-        <p class="product-desc">私人文件的同步与备份。照片、文档、稿子都在这里，换台设备也能接着用。</p>
+        <p class="product-desc">自己的小仓库，照片文档稿子都塞这儿，换设备也能无缝续上。</p>
         <a class="product-link" href="https://drive.loongstudio.net" target="_blank" rel="noopener">https://drive.loongstudio.net <span aria-hidden="true">↗</span></a>
       </div>
     </article>
@@ -267,7 +228,7 @@ document.body.className = 'view-' + (document.documentElement.dataset.view || 'h
           <span class="product-name-cn" data-text="NAS">NAS</span>
           <em>Storage</em>
         </h3>
-        <p class="product-desc">家里的存储服务器，从 2T 攒到 20T，管着备份、影视库和离线下载。</p>
+        <p class="product-desc">家里蹲的存储服务器，从 2T 攒到 20T，备份 / 影视库 / 离线下载全包。</p>
         <a class="product-link" href="https://nas.loongstudio.net" target="_blank" rel="noopener">https://nas.loongstudio.net <span aria-hidden="true">↗</span></a>
       </div>
     </article>
@@ -281,7 +242,7 @@ document.body.className = 'view-' + (document.documentElement.dataset.view || 'h
           <span class="product-name-cn" data-text="图床">图床</span>
           <em>Images</em>
         </h3>
-        <p class="product-desc">博客配图都放在这里，不压缩画质，也不加水印，链接长期有效。</p>
+        <p class="product-desc">博客配图都扔这儿，不压画质也不加水印，链接长期有效随便用。</p>
         <a class="product-link" href="https://img.loongstudio.net" target="_blank" rel="noopener">https://img.loongstudio.net <span aria-hidden="true">↗</span></a>
       </div>
     </article>
@@ -295,7 +256,7 @@ document.body.className = 'view-' + (document.documentElement.dataset.view || 'h
           <span class="product-name-cn" data-text="影音">影音</span>
           <em>Media</em>
         </h3>
-        <p class="product-desc">自建的影视库，手机、电脑、电视都能接着看，进度自动同步。</p>
+        <p class="product-desc">自建影视库，手机电脑电视无缝接力，进度自动同步，摸鱼利器。</p>
         <a class="product-link" href="https://media.loongstudio.net" target="_blank" rel="noopener">https://media.loongstudio.net <span aria-hidden="true">↗</span></a>
       </div>
     </article>
@@ -309,7 +270,7 @@ document.body.className = 'view-' + (document.documentElement.dataset.view || 'h
           <span class="product-name-cn" data-text="工具">工具</span>
           <em>Tools</em>
         </h3>
-        <p class="product-desc">格式转换、图片压缩、编码解码这类常用小工具，打开就能用，不用注册。</p>
+        <p class="product-desc">格式转换、图片压缩、编解码这些常用小工具，打开即用，不用注册白嫖。</p>
         <a class="product-link" href="https://tools.loongstudio.net" target="_blank" rel="noopener">https://tools.loongstudio.net <span aria-hidden="true">↗</span></a>
       </div>
     </article>
@@ -342,34 +303,32 @@ document.body.className = 'view-' + (document.documentElement.dataset.view || 'h
   <div class="container footer-main">
     <div class="footer-brand">
       <span class="footer-brand-line">
-        <svg class="brand-mark brand-mark--lg" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-          <rect width="32" height="32" rx="9.5" fill="#2A6BD8"/>
-          <path d="M10.2 13.8 7.6 6.4l5.9 3.6z" fill="#fff"/>
-          <path d="M21.8 13.8 24.4 6.4l-5.9 3.6z" fill="#fff"/>
-          <circle cx="16" cy="19.7" r="6.9" fill="#fff"/>
-          <circle cx="13.5" cy="18.9" r="1.3" fill="#2A6BD8"/>
-          <circle cx="18.5" cy="18.9" r="1.3" fill="#2A6BD8"/>
-          <path d="M14.6 22.4a1.9 1.9 0 0 0 2.8 0" fill="none" stroke="#2A6BD8" stroke-width="1.15" stroke-linecap="round"/>
-        </svg>
-        <span class="brand-text brand-text--lg">Loong Studio</span>
+        <span class="brand-text brand-text--lg">LoongStudio</span>
       </span>
-      <p>做好工具，也过好日子</p>
+      <p>折腾小工具，也好好过日子</p>
     </div>
 
     <div class="footer-cols">
       <div class="footer-col">
         <h4>友情链接</h4>
         <a href="mailto:hello@loongstudio.net?subject=%E5%8F%8B%E9%93%BE%E4%BA%A4%E6%8D%A2">友链交换 · 发邮件</a>
-        <p class="footer-empty">这一栏留给朋友的小站，还空着。</p>
+        <p class="footer-empty">这栏留给同好们的小站，虚位以待～</p>
       </div>
     </div>
   </div>
 
   <div class="container footer-bottom">
-    <span>© 2026 LOONG STUDIO</span>
-    <span class="footer-note">六个站点 · 全部跑在 loongstudio.net</span>
+    <span>© 2026 <span class="brand-script">LoongStudio</span> · 萌新出道</span>
+    <span class="footer-note">六个小站 · 全在 loongstudio.net 下</span>
   </div>
 </footer>
+
+<!-- 黑白电视 / 彩色 CRT 切换（可回退：删掉这个按钮 + .bw-overlay 即可） -->
+<button id="bwToggle" class="bw-toggle" type="button" aria-pressed="false" title="切换 黑白 / 彩色">
+  <span class="bw-toggle__dot" aria-hidden="true"></span>
+  <span class="bw-toggle__text">彩色</span>
+</button>
+<div class="bw-overlay" aria-hidden="true"></div>
 
 <script src="/app.js"></script>
 </body>

@@ -6,9 +6,9 @@
 
 /* 每个视图对应的浏览器标题 */
 const TITLES = {
-  home: 'LOONG STUDIO · 做小工具的工作室',
-  about: '关于我们 · LOONG STUDIO',
-  products: '作品 · LOONG STUDIO'
+  home: 'LOONG STUDIO · 萌新的小工具窝',
+  about: '关于我 · LOONG STUDIO',
+  products: '作品集 · LOONG STUDIO'
 };
 
 /* ---------------- 首屏：进场动效只跑一次 ---------------- */
@@ -17,12 +17,78 @@ const TITLES = {
   const slide = document.querySelector('.hero-slide');
   const mission = document.querySelector('.mission');
   if (!slide) return;
-  // 两帧之后再上类，transition 才有起点；
-  // 类一直挂着，从作品页切回来时不会再重放一次放大 + 淡入
-  requestAnimationFrame(() => requestAnimationFrame(() => {
+
+  // 进场：两帧后再上类，transition 才有起点；图与文字在「同一帧」一起淡入
+  const enter = () => requestAnimationFrame(() => requestAnimationFrame(() => {
     slide.classList.add('is-active');
     if (mission) mission.classList.add('is-run');
   }));
+
+  // ---------- 首屏背景 ----------
+  // 两种模式：
+  //  ① 有 data-api-bg → 用外部随机图 API（每次刷新换一张）
+  //  ② 没有 data-api-bg → 从 data-local-bgs 的本地图池里随机取一张
+  // 先预加载，等就绪再一起淡入（避免"图晚到、先空一阵再硬闪"）；API 失败/超时也回退本地图池。
+  const api = slide.dataset.apiBg;
+
+  // 本地图池：英文逗号分隔，可放任意多张；都没配就退回默认单张
+  const LOCAL = (slide.dataset.localBgs || '/image/hero.webp')
+    .split(',').map(s => s.trim()).filter(Boolean);
+
+  let settled = false;
+  let timer = null;
+  const done = () => {
+    if (settled) return;
+    settled = true;
+    if (timer) clearTimeout(timer);
+    enter();
+  };
+  const setBg = url => { slide.style.backgroundImage = 'url("' + url + '")'; };
+
+  // 随机起点；多张时记住上次用的那张，尽量不连着重复
+  function pickLocal() {
+    let i = Math.floor(Math.random() * LOCAL.length);
+    if (LOCAL.length > 1) {
+      let last = -1;
+      try { last = parseInt(localStorage.getItem('ls-hero-idx'), 10); } catch (e) {}
+      let guard = 0;
+      while (i === last && guard++ < 12) i = Math.floor(Math.random() * LOCAL.length);
+      try { localStorage.setItem('ls-hero-idx', String(i)); } catch (e) {}
+    }
+    return i;
+  }
+
+  // 依次试本地图：某张 404 就自动换下一张；全都不行就保持背景色、照常进场
+  function loadLocal(start, step) {
+    const n = step || 0;
+    const url = LOCAL[(start + n) % LOCAL.length];
+    const img = new Image();
+    img.onload = () => { if (settled) return; setBg(url); done(); };
+    img.onerror = () => {
+      if (settled) return;
+      if (n + 1 < LOCAL.length) loadLocal(start, n + 1);
+      else done();
+    };
+    img.src = url;
+  }
+
+  // ② 本地模式
+  if (!api) { loadLocal(pickLocal()); return; }
+
+  // ① API 模式：成功才用 API 图；失败或 2.5s 超时回退本地图池
+  let gaveUp = false;
+  const fallback = () => {
+    if (gaveUp || settled) return;
+    gaveUp = true;
+    loadLocal(pickLocal());
+  };
+  timer = setTimeout(fallback, 2500);
+
+  const url = api + (api.indexOf('?') >= 0 ? '&' : '?') + 'rand=' + Date.now();
+  const probe = new Image();
+  probe.onload = () => { if (settled || gaveUp) return; setBg(url); done(); };
+  probe.onerror = fallback;
+  probe.src = url;
 })();
 
 /* ---------------- 导航：首屏透明 / 滚动实底 / 移动端菜单 ---------------- */
@@ -118,7 +184,7 @@ const TITLES = {
     } else {
       const about = document.getElementById('about');
       const passed = about && about.getBoundingClientRect().top <= window.innerHeight * 0.4;
-      active = passed ? '/about' : null;
+      active = passed ? '#about' : null;
     }
     document.querySelectorAll('.nav-item').forEach(a => {
       a.classList.toggle('is-active', a.getAttribute('href') === active);
@@ -172,6 +238,23 @@ const TITLES = {
     if (!href || href === '#') return;                        // 占位链接
     if (/^(https?:|mailto:|tel:)/i.test(href)) return;         // 外链
     if (href[0] !== '/' && href[0] !== '#') return;            // 相对文件名等
+
+    // 页内锚点（关于我）：作品页里 .about 是被隐藏的，要先切回主页视图再定位
+    if (href[0] === '#') {
+      const id = href.slice(1);
+      const target = id ? document.getElementById(id) : null;
+      if (!target) { window.scrollTo({ top: 0, behavior: 'smooth' }); e.preventDefault(); return; }
+      // 不在主页视图（如在作品页）：切回主页让 .about 显示出来，再平滑滚过去
+      if (!document.body.classList.contains('view-home')) {
+        if ((location.pathname.replace(/\/+$/, '') || '/') !== '/') history.pushState(null, '', '/');
+        document.body.classList.remove('view-products');
+        document.body.classList.add('view-home');
+        document.title = TITLES.home;
+      }
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      e.preventDefault();
+      return;
+    }
 
     e.preventDefault();
     go(href, true);
@@ -449,4 +532,108 @@ const TITLES = {
   window.addEventListener('resize', onScroll);
   update();
   parallax();
+})();
+
+/* ---------------- 黑白电视 / 彩色 CRT 切换（可回退：删掉这段即可） ---------------- */
+
+(function initBwToggle() {
+  const root = document.documentElement;          // 类挂在 <html> 上，视图切换只动 <body> 不影响它
+  const btn = document.getElementById('bwToggle');
+  const label = btn ? btn.querySelector('.bw-toggle__text') : null;
+  const KEY = 'ls-theme';
+
+  function apply(on) {
+    root.classList.toggle('theme-bw', on);
+    if (btn) btn.setAttribute('aria-pressed', String(on));
+    if (label) label.textContent = on ? '黑白' : '彩色';
+  }
+
+  let saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) { /* 隐私模式读不到就忽略 */ }
+  let on = saved === 'bw';
+  apply(on);
+
+  if (btn) {
+    btn.addEventListener('click', () => {
+      on = !root.classList.contains('theme-bw');
+      apply(on);
+      try { localStorage.setItem(KEY, on ? 'bw' : 'color'); } catch (e) {}
+    });
+  }
+})();
+
+/* ---------------- 首屏一言：即时显示（缓存/本地）+ 后台预取，图文同时出现 ---------------- */
+
+(function initQuote() {
+  const quote = document.getElementById('missionQuote');
+  const from = document.getElementById('missionFrom');
+  if (!quote) return;
+
+  // 本地兜底语录：t 正文 / f 出处（留空不显示出处）
+  const FALLBACK = [
+    { t: '代码写不完，就先睡觉。', f: '手记' },
+    { t: '慢慢来，比较快。', f: '手记' },
+    { t: '所有远方，都从脚下开始。', f: '手记' },
+    { t: '别急，光会照进来的。', f: '手记' },
+    { t: '热爱可抵岁月漫长。', f: '' },
+    { t: '星光不问赶路人。', f: '' },
+    { t: '路漫漫其修远兮，吾将上下而求索。', f: '屈原《离骚》' }
+  ];
+
+  function render(text, src) {
+    quote.textContent = text;
+    if (from) from.textContent = src ? '—— ' + src : '';
+  }
+
+  // 1) 立刻显示：从「句子池」取队首 —— 保证和背景图同一帧出现
+  //    池子里常备几条，所以就算接口偶尔失败、或者连着快速刷新，也能换到新句
+  const KEY = 'ls-quote-pool';
+  const MAX = 4;                    // 池子最多存几条待显示
+
+  function loadPool() {
+    let p = [];
+    try {
+      const raw = JSON.parse(localStorage.getItem(KEY) || '[]');
+      if (Array.isArray(raw)) p = raw.filter(q => q && q.t);
+    } catch (e) {}
+    return p;
+  }
+  function savePool(p) {
+    try { localStorage.setItem(KEY, JSON.stringify(p.slice(0, MAX))); } catch (e) {}
+  }
+  // 池子太薄就用本地语录补到 2 条；exclude 用来避开刚显示过的那句，防止连刷重复
+  function topUp(p, exclude) {
+    const seen = {};
+    p.forEach(q => { seen[q.t] = 1; });
+    if (exclude) seen[exclude] = 1;
+    let guard = 0;
+    while (p.length < 2 && guard++ < 40) {
+      const q = FALLBACK[Math.floor(Math.random() * FALLBACK.length)];
+      if (!seen[q.t]) { p.push({ t: q.t, f: q.f }); seen[q.t] = 1; }
+    }
+    return p;
+  }
+
+  const pool = topUp(loadPool());
+  const now = pool.shift() || { t: '探索代码的无限可能', f: '' };
+  render(now.t, now.f);
+  savePool(topUp(pool, now.t));     // 存回剩下的，并补到至少 2 条备用
+
+  // 2) 后台补货：新句追加到池尾，供「后续刷新」用（不当场替换，句子不会在眼前跳变）
+  if (!('fetch' in window) || !('AbortController' in window)) return;
+  const API = 'https://v1.hitokoto.cn/?c=a&c=c&c=e&min_length=6&max_length=18&encode=json';
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 4000);
+  fetch(API, { signal: ctrl.signal })
+    .then(r => (r.ok ? r.json() : null))
+    .then(d => {
+      if (!d || !d.hitokoto) return;
+      const p = topUp(loadPool());                              // 重新读，避免覆盖刚写的
+      if (p.length >= MAX) return;                              // 池子满了，这条先不要
+      if (p.some(q => q.t === d.hitokoto)) return;              // 去重
+      p.push({ t: d.hitokoto, f: d.from || '' });
+      savePool(p);
+    })
+    .catch(() => {})
+    .finally(() => clearTimeout(timer));
 })();
