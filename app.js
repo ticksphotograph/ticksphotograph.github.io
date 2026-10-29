@@ -583,7 +583,47 @@ const TITLES = {
   function render(text, src) {
     quote.textContent = text;
     if (from) from.textContent = src ? '—— ' + src : '';
+    alignFrom();
   }
+
+  /* 出处贴住标题「最长那一行」的右端（通常就是第一行）：
+     中文长句换行后每行长短不一，只写 text-align:right 会让落款漂到整栏最右边、
+     离句子很远。这里实测所有行里最靠右的位置，再用 margin-right 把落款推回去对齐。 */
+  function alignFrom() {
+    if (!from || !from.textContent) return;
+    from.style.marginRight = '0px';                  // 先归零，拿到整栏的右边界
+
+    const tr = document.createRange();                // 标题：逐行一个 rect
+    tr.selectNodeContents(quote);
+    const lines = tr.getClientRects();
+    if (!lines.length) return;
+
+    // 取所有行里最靠右的右边界（居中排版时最长的那行才是整段文字的视觉右沿）
+    let edgeRight = lines[0].right;
+    for (let i = 1; i < lines.length; i++) {
+      if (lines[i].right > edgeRight) edgeRight = lines[i].right;
+    }
+
+    const box = from.getBoundingClientRect();         // 落款整栏的位置
+    const fr = document.createRange();                // 落款自身字宽（nowrap，必是一行）
+    fr.selectNodeContents(from);
+    const frs = fr.getClientRects();
+    const textW = frs.length ? (frs[frs.length - 1].right - frs[0].left) : 0;
+
+    const room = Math.max(0, box.right - edgeRight);  // 最长行右侧的空档
+    const keep = Math.max(0, box.width - textW);      // 但至少要让落款自己放得下
+    from.style.marginRight = Math.min(room, keep) + 'px';
+  }
+
+  // 字体加载完、窗口尺寸变化后，每行的位置都会变，重新贴一次
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(alignFrom).catch(() => {});
+  }
+  let alignRaf = 0;
+  window.addEventListener('resize', () => {
+    if (alignRaf) return;
+    alignRaf = requestAnimationFrame(() => { alignRaf = 0; alignFrom(); });
+  });
 
   // 1) 立刻显示：从「句子池」取队首 —— 保证和背景图同一帧出现
   //    池子里常备几条，所以就算接口偶尔失败、或者连着快速刷新，也能换到新句

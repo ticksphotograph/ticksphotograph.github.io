@@ -34,10 +34,15 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
 <noscript><style>
   /* 没有 JS 时：取消所有「等动画才出现」的初始隐藏态，内容直接铺开 */
-  .hero-slide, .mission, .reveal, .tl-card-inner,
+  .hero-slide, .reveal, .tl-card-inner,
   .product-bg, .product-index, .product-name, .product-desc, .product-link {
     opacity: 1 !important;
     transform: none !important;
+  }
+  /* 首屏一言块靠 transform 做竖直居中，这里不能写成 none，否则整块会掉到下半屏 */
+  .mission {
+    opacity: 1 !important;
+    transform: translateY(-50%) !important;
   }
   .products { display: block !important; }
   .product-rail { display: none; }
@@ -111,7 +116,6 @@ document.body.className = 'view-' + (document.documentElement.dataset.view || 'h
   </div>
 
   <div class="mission">
-    <p class="mission-label">一言</p>
     <h1 class="mission-title"><span id="missionQuote">探索代码的无限可能</span></h1>
     <p class="mission-from" id="missionFrom"></p>
   </div>

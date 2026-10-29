@@ -296,48 +296,54 @@ body.view-products .header:not(.is-solid)::before {
    背后一块模糊柔光暗角托住可读性（避免硬黑框，也不压住背景图） */
 .mission {
   position: absolute;
-  top: calc(var(--header-h) + 14px);
-  left: clamp(24px, 8vw, 115px);
-  width: clamp(280px, 26.4vw, 380px);
-  padding: clamp(28px, 3vw, 44px) 0 0 0;
+  /* 水平居中走「left/right 都为 0 + 左右 margin auto」而不是 left:50% + translateX：
+     因为绝对定位元素的 shrink-to-fit 会把可用宽度算成「容器宽 - left」，
+     用 left:50% 的话宽度上限只剩半屏，手机上整块会被挤窄。
+     竖直居中仍靠 top:50% + translateY(-50%)，入场动画就叠在这个位移上 */
+  top: 50%;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  /* 宽度跟着句子走：fit-content 让短句该多宽就多宽（一行放得下就一行），
+     max-width 兜住长句 —— 一行约 10 个字，接口限长 18 字，最多两行排完 */
+  width: fit-content;
+  max-width: clamp(320px, 42vw, 600px);
+  padding: 0;
+  text-align: center;
   isolation: isolate;
   opacity: 0;
-  transform: translateY(-18px);
+  transform: translateY(calc(-50% - 18px));
   transition: opacity .9s var(--ease) .1s, transform .9s var(--ease) .1s;
 }
-.mission.is-run { opacity: 1; transform: none; }
+.mission.is-run { opacity: 1; transform: translateY(-50%); }
 /* 文字后方的柔光暗角（背景框）已去掉，改由标题自身的柔和投影保证可读性 */
 
-.mission-label {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: clamp(12px, 1.1vw, 14px);
-  line-height: 1.2;
-  color: var(--mint);            /* 暖金小标签 */
-  letter-spacing: .42em;
-  text-transform: uppercase;
-}
-/* 「一言」标签前的那根横线已去掉 */
+/* 标题顶部的「一言」小标签已删除（用户要求），.mission-label 规则一并清掉；
+   整块改成竖向居中后，标题不再需要额外的上留白，margin-top 归零更居中 */
 
 .mission-title {
   /* 手写体：优先华文行楷，其次楷体，非 Windows 回退霞鹜文楷 */
   font-family: 'STXingkai', '华文行楷', 'Xingkai SC', 'Kaiti SC',
                'STKaiti', 'KaiTi', '楷体', 'LXGW WenKai', cursive;
   font-weight: 400;             /* 手写字体一般只有常规体，避免合成加粗失真 */
-  margin-top: 20px;
+  margin-top: 0;
   font-size: clamp(30px, 3.6vw, 48px);   /* 固定字号，句子长了自然换行，不再缩放 */
   line-height: 1.4;
-  letter-spacing: .01em;
+  letter-spacing: 0;            /* 手写体本身字面就松，再加字距反而让短句卡在换行临界点 */
   color: #fff;
   /* 只留一层柔和暗影，压在大图上也能读清；不再做像素描边 */
   text-shadow: 0 2px 30px rgba(0, 0, 0, .55), 0 1px 3px rgba(0, 0, 0, .4);
 }
-/* 出处：单独一行小字，白字（原来用樱粉）；没有出处时不占位 */
+/* 出处：单独一行小字，白字（原来用樱粉）；靠右落款，没有出处时不占位。
+   右边界由 app.js 的 alignFrom() 按标题最后一行实测补 margin-right，
+   所以这里只需保证「不折行」，让它永远单行贴住句尾 */
 .mission-from {
   margin-top: 14px;
   font-family: var(--font-display);
-  font-size: clamp(13px, 1.1vw, 16px);
+  font-size: clamp(14px, 1.3vw, 19px);   /* 原本 13~16px，整体调大一档 */
   letter-spacing: .04em;
+  text-align: right;
+  white-space: nowrap;
   color: #fff;
   text-shadow: 0 1px 12px rgba(0, 0, 0, .55), 0 1px 3px rgba(0, 0, 0, .4);
 }
@@ -1108,7 +1114,8 @@ body.view-products .footer { display: none; }
   .nav-item::after { display: none; }
   .nav-item.is-active { color: var(--blue); }
 
-  .mission { padding-right: 28px; }
+  /* 已经居中悬浮，不用再给右侧汉堡留空；短句仍然按内容收缩 */
+  .mission { width: fit-content; max-width: min(84vw, 460px); }
   .hero-slide { background-position: 70% center; }
 
   /* 竖屏是「文字 + 图」上下叠，塞不满一屏时就让它自己长高，别裁内容 */
@@ -1198,11 +1205,13 @@ body.view-products .footer { display: none; }
   .about-meta b { font-size: 16px; }
 
   .mission {
-    width: 58vw;
-    padding: 42px 24px 40px 20px;
+    width: fit-content;
+    max-width: min(84vw, 440px);
+    padding: 0 20px;                  /* 左右留白对称，居中才不会偏 */
     border-radius: 0 0 58px 0;
   }
-  .mission-title { margin-top: 14px; }
+  /* 小屏字号再收一档，保证 16 字的句子也在两行内排完（30px 太占宽度） */
+  .mission-title { margin-top: 0; font-size: clamp(26px, 7.2vw, 34px); }
   .sec-title { font-size: 26px; }
   .product-bg { height: 66vw; }
   .history { padding: 48px 0 56px; }
@@ -1260,10 +1269,11 @@ body.view-products .footer { display: none; }
   inset: 0;
   z-index: 205;                 /* 在扫描线(200)之上，整屏画面都在它底下被去色 */
   pointer-events: none;         /* 不拦截点击，底下内容照常可点 */
-  /* 老电视观感：中心一抹冷白辉光（点亮的显像管）+ 四周轻暗角，避免"死灰" */
+  /* 老电视观感：中心一抹冷白辉光（点亮的显像管）+ 四周轻暗角，避免"死灰"
+     暗角原来压到 30%，页面上下两端的字会被压灰；收到 14% 只留氛围感 */
   background:
-    radial-gradient(ellipse at center, rgba(190, 210, 255, .07) 0%, rgba(190, 210, 255, 0) 55%),
-    radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, .30) 100%);
+    radial-gradient(ellipse at center, rgba(190, 210, 255, .05) 0%, rgba(190, 210, 255, 0) 55%),
+    radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 66%, rgba(0, 0, 0, .18) 100%);
   opacity: 0;
   transition: opacity .45s ease;
 }
@@ -1283,16 +1293,32 @@ body.view-products .footer { display: none; }
   to   { transform: translateY(460%); }
 }
 
-/* 开启黑白模式：整屏去色 + 高对比（找回"电视信号"的劲），中心辉光 + 轻暗角由 background 给 */
+/* 开启黑白模式：去色 + 极轻提对比，不再加亮。
+   原来写 contrast(1.22) brightness(1.06)：亮部被推到纯白、中间调被压平，
+   压在照片上的白字（首屏一言、作品名）几乎看不见，正文小字也发灰；
+   去掉 brightness 后亮部不再爆白，对比只留 1.12 把去色后发灰的主色字拉回来 */
 html.theme-bw .bw-overlay {
   opacity: 1;
-  backdrop-filter: grayscale(1) contrast(1.22) brightness(1.06);
-  -webkit-backdrop-filter: grayscale(1) contrast(1.22) brightness(1.06);
+  /* 只留一点点提对比（1.12）：去色后原先靠颜色区分的主色文字会掉成中灰，
+     轻微提对比能把它们拉回来；不能再叠 brightness，否则亮部照片会把白字吞掉 */
+  backdrop-filter: grayscale(1) contrast(1.12);
+  -webkit-backdrop-filter: grayscale(1) contrast(1.12);
 }
-/* 兜底：万一浏览器不支持 backdrop-filter，至少把照片去色（与全局叠层叠加也无害） */
+/* 黑白下去掉色彩对比，压在照片上的白字靠更实的投影才站得住（仅黑白模式，彩色不受影响） */
+html.theme-bw .mission-title {
+  text-shadow:
+    0 2px 10px rgba(0, 0, 0, .78),
+    0 0 32px rgba(0, 0, 0, .62),
+    0 1px 3px rgba(0, 0, 0, .55);
+}
+html.theme-bw .mission-from {
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .85), 0 0 22px rgba(0, 0, 0, .65);
+}
+html.theme-bw .product-name-cn { text-shadow: 0 8px 34px rgba(0, 0, 0, .62); }
+/* 兜底：万一浏览器不支持 backdrop-filter，至少把照片去色（不再叠 contrast，避免和叠层叠加两次） */
 html.theme-bw .hero-slide,
 html.theme-bw .product-bg-img,
-html.theme-bw .about-media img { filter: grayscale(1) contrast(1.12); }
+html.theme-bw .about-media img { filter: grayscale(1); }
 html.theme-bw .bw-toggle { color: #fff; border-color: rgba(255, 255, 255, .45); }
 html.theme-bw .bw-toggle__dot { background: #fff; box-shadow: 0 0 8px rgba(255, 255, 255, .7); }
 
